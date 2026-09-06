@@ -1,0 +1,1 @@
+export function LoadingState({ children, className = '', ...props }: any) { return <div className={`component-LoadingState ${className}`} {...props}>{children || 'LoadingState'}</div> }

@@ -1,0 +1,1 @@
+export function SectionHeader({ children, className = '', ...props }: any) { return <div className={`component-SectionHeader ${className}`} {...props}>{children || 'SectionHeader'}</div> }

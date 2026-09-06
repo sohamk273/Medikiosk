@@ -1,0 +1,1 @@
+export function Input({ children, className = '', ...props }: any) { return <div className={`component-Input ${className}`} {...props}>{children || 'Input'}</div> }

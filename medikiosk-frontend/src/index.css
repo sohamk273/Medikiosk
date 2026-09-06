@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #0F4C5C;
+  --color-primary-foreground: #ffffff;
+  
+  --color-secondary: #E3F6F5;
+  --color-secondary-foreground: #0F4C5C;
+  
+  --color-mint: #BAE6FD;
+  --color-medical: #3B82F6;
+
+  --color-destructive: #D9381E;
+  --color-destructive-foreground: #ffffff;
+  
+  --color-background: #F8FAFC;
+  --color-foreground: #0f172a;
+  
+  --color-card: #ffffff;
+  --color-card-foreground: #0f172a;
+  --color-border: #E2E8F0;
+  
+  --font-sans: 'Inter', Roboto, system-ui, sans-serif;
+  --font-devanagari: 'Noto Sans Devanagari', 'Inter', Roboto, system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Typography utilities */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes waveform-bar {
+  from { transform: scaleY(0.3); }
+  to   { transform: scaleY(1.0); }
+}
+

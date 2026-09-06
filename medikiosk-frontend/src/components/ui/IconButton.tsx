@@ -1,0 +1,1 @@
+export function IconButton({ children, className = '', ...props }: any) { return <div className={`component-IconButton ${className}`} {...props}>{children || 'IconButton'}</div> }

@@ -1,0 +1,1 @@
+export function Card({ children, className = '', ...props }: any) { return <div className={`component-Card ${className}`} {...props}>{children || 'Card'}</div> }

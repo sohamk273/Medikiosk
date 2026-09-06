@@ -1,0 +1,1 @@
+export function ProgressBar({ children, className = '', ...props }: any) { return <div className={`component-ProgressBar ${className}`} {...props}>{children || 'ProgressBar'}</div> }

@@ -1,0 +1,1 @@
+export function DangerButton({ children, className = '', ...props }: any) { return <div className={`component-DangerButton ${className}`} {...props}>{children || 'DangerButton'}</div> }

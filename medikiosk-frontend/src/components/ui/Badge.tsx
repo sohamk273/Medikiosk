@@ -1,0 +1,1 @@
+export function Badge({ children, className = '', ...props }: any) { return <div className={`component-Badge ${className}`} {...props}>{children || 'Badge'}</div> }

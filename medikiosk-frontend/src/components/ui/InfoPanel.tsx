@@ -1,0 +1,1 @@
+export function InfoPanel({ children, className = '', ...props }: any) { return <div className={`component-InfoPanel ${className}`} {...props}>{children || 'InfoPanel'}</div> }

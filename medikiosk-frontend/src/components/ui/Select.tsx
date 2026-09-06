@@ -1,0 +1,1 @@
+export function Select({ children, className = '', ...props }: any) { return <div className={`component-Select ${className}`} {...props}>{children || 'Select'}</div> }

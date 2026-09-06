@@ -1,0 +1,1 @@
+export function Alert({ children, className = '', ...props }: any) { return <div className={`component-Alert ${className}`} {...props}>{children || 'Alert'}</div> }

@@ -1,0 +1,1 @@
+export function ErrorState({ children, className = '', ...props }: any) { return <div className={`component-ErrorState ${className}`} {...props}>{children || 'ErrorState'}</div> }

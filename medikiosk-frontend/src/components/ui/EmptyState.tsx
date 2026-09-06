@@ -1,0 +1,1 @@
+export function EmptyState({ children, className = '', ...props }: any) { return <div className={`component-EmptyState ${className}`} {...props}>{children || 'EmptyState'}</div> }
