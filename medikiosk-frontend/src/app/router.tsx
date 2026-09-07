@@ -29,9 +29,11 @@ import Complete from '@/pages/patient/Complete';
 // Doctor Pages
 import Login from '@/pages/doctor/Login';
 import Dashboard from '@/pages/doctor/Dashboard';
-import Queue from '@/pages/doctor/Queue';
+import DoctorQueue from '@/pages/doctor/DoctorQueue';
+import CaseDetail from '@/pages/doctor/CaseDetail';
 import Patients from '@/pages/doctor/Patients';
 import Consultation from '@/pages/doctor/Consultation';
+import CaseSummary from '@/pages/doctor/CaseSummary';
 import Summary from '@/pages/doctor/patient/Summary';
 import History from '@/pages/doctor/patient/History';
 import PatientAyush from '@/pages/doctor/patient/Ayush';
@@ -77,12 +79,14 @@ export const router = createBrowserRouter([
     path: '/doctor',
     element: <EMRLayout />,
     children: [
-      { index: true, element: <Navigate to="dashboard" replace /> },
+      { index: true, element: <Navigate to="queue" replace /> },
       { path: 'login', element: <Login /> }, // In reality, login might not use EMRLayout, but for slice 1 placeholder it's fine
       { path: 'dashboard', element: <Dashboard /> },
-      { path: 'queue', element: <Queue /> },
+      { path: 'queue', element: <DoctorQueue /> },
+      { path: 'case/:caseId', element: <CaseDetail /> },
+      { path: 'case/:caseId/summary', element: <CaseSummary /> },
       { path: 'patients', element: <Patients /> },
-      { path: 'consultation', element: <Consultation /> },
+      { path: 'consultation/:caseId', element: <Consultation /> },
       {
         path: 'patient/:id',
         children: [

@@ -153,6 +153,86 @@ const defaultReviewState: ReviewState = {
   confirmed: false,
 };
 
+// ─── Slice 8: Submission ──────────────────────────────────────────────────────
+
+export interface SubmissionState {
+  status: 'idle' | 'submitting' | 'success' | 'error';
+  caseId?: string;
+  submittedAt?: string;
+}
+
+const defaultSubmissionState: SubmissionState = {
+  status: 'idle',
+};
+
+// ─── Slice 10: Consultation ───────────────────────────────────────────────────
+
+export interface ClinicalAssessment {
+  findings: string;
+  assessment: string;
+  diagnosis: string;
+  notes: string;
+}
+
+export interface AyushDoctorAssessment {
+  prakriti: string;
+  agni: string;
+  koshtha: string;
+  dosha: string;
+  notes: string;
+}
+
+export interface PrescriptionItem {
+  id: string;
+  medicineName: string;
+  dosage: string;
+  frequency: string;
+  duration: string;
+  instructions: string;
+}
+
+export interface Prescription {
+  items: PrescriptionItem[];
+}
+
+export interface FollowUpPlan {
+  required: boolean;
+  timeframe: string;
+  instructions: string;
+}
+
+export interface ConsultationState {
+  status: 'idle' | 'draft' | 'finalized';
+  clinicalAssessment: ClinicalAssessment;
+  ayushAssessment: AyushDoctorAssessment;
+  prescription: Prescription;
+  followUp: FollowUpPlan;
+  startedAt?: string;
+  updatedAt?: string;
+  finalizedAt?: string;
+}
+
+const defaultConsultationState: ConsultationState = {
+  status: 'idle',
+  clinicalAssessment: { findings: '', assessment: '', diagnosis: '', notes: '' },
+  ayushAssessment: { prakriti: '', agni: '', koshtha: '', dosha: '', notes: '' },
+  prescription: { items: [] },
+  followUp: { required: false, timeframe: '', instructions: '' },
+};
+
+// ─── Slice 11: Case Closure ─────────────────────────────────────────────────
+
+export interface CaseClosureState {
+  acknowledged: boolean;
+  closed: boolean;
+  closedAt?: string;
+}
+
+const defaultCaseClosureState: CaseClosureState = {
+  acknowledged: false,
+  closed: false,
+};
+
 // ─── Full Session State ─────────────────────────────────────────────────────
 
 export interface PatientSessionState {
@@ -169,6 +249,9 @@ export interface PatientSessionState {
   allergyHistory: AllergyHistory;
   documentIntake: DocumentIntakeState;
   review: ReviewState;
+  submission: SubmissionState;
+  consultation: ConsultationState;
+  caseClosure: CaseClosureState;
 }
 
 export interface PatientSessionContextType extends PatientSessionState {
@@ -212,6 +295,30 @@ export interface PatientSessionContextType extends PatientSessionState {
 
   // Slice 7: Review setters
   setReviewConfirmed: (confirmed: boolean) => void;
+
+  // Slice 8: Submission setters
+  startSubmission: () => void;
+  completeSubmission: (caseId: string) => void;
+  failSubmission: () => void;
+  resetSubmission: () => void;
+
+  // Slice 10: Consultation setters
+  startConsultation: () => void;
+  updateClinicalAssessment: (assessment: Partial<ClinicalAssessment>) => void;
+  updateAyushAssessment: (assessment: Partial<AyushDoctorAssessment>) => void;
+  addPrescriptionItem: () => void;
+  updatePrescriptionItem: (id: string, updates: Partial<PrescriptionItem>) => void;
+  removePrescriptionItem: (id: string) => void;
+  setFollowUp: (followUp: Partial<FollowUpPlan>) => void;
+  saveConsultationDraft: () => void;
+  finalizeConsultation: () => void;
+  loadConsultation: (consultation: ConsultationState) => void;
+  resetConsultation: () => void;
+
+  // Slice 11: Case Closure setters
+  setCaseAcknowledged: (acknowledged: boolean) => void;
+  closeCase: () => void;
+  resetCaseClosure: () => void;
 }
 
 const defaultState: PatientSessionState = {
@@ -228,6 +335,9 @@ const defaultState: PatientSessionState = {
   allergyHistory: defaultAllergyHistory,
   documentIntake: defaultDocumentIntake,
   review: defaultReviewState,
+  submission: defaultSubmissionState,
+  consultation: defaultConsultationState,
+  caseClosure: defaultCaseClosureState,
 };
 
 const PatientSessionContext = createContext<PatientSessionContextType | undefined>(undefined);
@@ -449,6 +559,185 @@ export function PatientSessionProvider({ children }: { children: ReactNode }) {
       }
     }));
 
+  // ─── Slice 8: Submission setters ─────────────────────────────────────────
+
+  const startSubmission = () =>
+    setState(s => ({
+      ...s,
+      submission: {
+        ...s.submission,
+        status: 'submitting',
+      }
+    }));
+
+  const completeSubmission = (caseId: string) =>
+    setState(s => ({
+      ...s,
+      submission: {
+        status: 'success',
+        caseId,
+        submittedAt: new Date().toISOString(),
+      }
+    }));
+
+  const failSubmission = () =>
+    setState(s => ({
+      ...s,
+      submission: {
+        ...s.submission,
+        status: 'error',
+      }
+    }));
+
+  const resetSubmission = () =>
+    setState(s => ({
+      ...s,
+      submission: defaultSubmissionState,
+    }));
+
+  // ─── Slice 10: Consultation setters ──────────────────────────────────────
+
+  const startConsultation = () =>
+    setState(s => ({
+      ...s,
+      consultation: {
+        ...s.consultation,
+        status: s.consultation.status === 'idle' ? 'draft' : s.consultation.status,
+        startedAt: s.consultation.startedAt || new Date().toISOString(),
+      }
+    }));
+
+  const updateClinicalAssessment = (assessment: Partial<ClinicalAssessment>) =>
+    setState(s => ({
+      ...s,
+      consultation: {
+        ...s.consultation,
+        clinicalAssessment: { ...s.consultation.clinicalAssessment, ...assessment },
+      }
+    }));
+
+  const updateAyushAssessment = (assessment: Partial<AyushDoctorAssessment>) =>
+    setState(s => ({
+      ...s,
+      consultation: {
+        ...s.consultation,
+        ayushAssessment: { ...s.consultation.ayushAssessment, ...assessment },
+      }
+    }));
+
+  const addPrescriptionItem = () =>
+    setState(s => ({
+      ...s,
+      consultation: {
+        ...s.consultation,
+        prescription: {
+          ...s.consultation.prescription,
+          items: [
+            ...s.consultation.prescription.items,
+            {
+              id: crypto.randomUUID(),
+              medicineName: '',
+              dosage: '',
+              frequency: '',
+              duration: '',
+              instructions: '',
+            }
+          ]
+        }
+      }
+    }));
+
+  const updatePrescriptionItem = (id: string, updates: Partial<PrescriptionItem>) =>
+    setState(s => ({
+      ...s,
+      consultation: {
+        ...s.consultation,
+        prescription: {
+          ...s.consultation.prescription,
+          items: s.consultation.prescription.items.map(item => 
+            item.id === id ? { ...item, ...updates } : item
+          ),
+        }
+      }
+    }));
+
+  const removePrescriptionItem = (id: string) =>
+    setState(s => ({
+      ...s,
+      consultation: {
+        ...s.consultation,
+        prescription: {
+          ...s.consultation.prescription,
+          items: s.consultation.prescription.items.filter(item => item.id !== id),
+        }
+      }
+    }));
+
+  const setFollowUp = (followUp: Partial<FollowUpPlan>) =>
+    setState(s => ({
+      ...s,
+      consultation: {
+        ...s.consultation,
+        followUp: { ...s.consultation.followUp, ...followUp },
+      }
+    }));
+
+  const saveConsultationDraft = () =>
+    setState(s => ({
+      ...s,
+      consultation: {
+        ...s.consultation,
+        status: 'draft',
+        updatedAt: new Date().toISOString(),
+      }
+    }));
+
+  const finalizeConsultation = () =>
+    setState(s => ({
+      ...s,
+      consultation: {
+        ...s.consultation,
+        status: 'finalized',
+        finalizedAt: new Date().toISOString(),
+      }
+    }));
+
+  const loadConsultation = (consultation: ConsultationState) =>
+    setState(s => ({
+      ...s,
+      consultation,
+    }));
+
+  const resetConsultation = () =>
+    setState(s => ({
+      ...s,
+      consultation: defaultConsultationState,
+    }));
+
+  // ─── Slice 11: Case Closure setters ──────────────────────────────────────
+
+  const setCaseAcknowledged = (acknowledged: boolean) =>
+    setState(s => ({
+      ...s,
+      caseClosure: { ...s.caseClosure, acknowledged }
+    }));
+
+  const closeCase = () =>
+    setState(s => ({
+      ...s,
+      caseClosure: {
+        acknowledged: true,
+        closed: true,
+        closedAt: new Date().toISOString(),
+      }
+    }));
+
+  const resetCaseClosure = () =>
+    setState(s => ({
+      ...s,
+      caseClosure: defaultCaseClosureState,
+    }));
+
   return (
     <PatientSessionContext.Provider value={{
       ...state,
@@ -483,6 +772,24 @@ export function PatientSessionProvider({ children }: { children: ReactNode }) {
       setDocumentIntake,
       completeDocumentIntake,
       setReviewConfirmed,
+      startSubmission,
+      completeSubmission,
+      failSubmission,
+      resetSubmission,
+      startConsultation,
+      updateClinicalAssessment,
+      updateAyushAssessment,
+      addPrescriptionItem,
+      updatePrescriptionItem,
+      removePrescriptionItem,
+      setFollowUp,
+      saveConsultationDraft,
+      finalizeConsultation,
+      loadConsultation,
+      resetConsultation,
+      setCaseAcknowledged,
+      closeCase,
+      resetCaseClosure,
     }}>
       {children}
     </PatientSessionContext.Provider>

@@ -161,11 +161,13 @@ export function KioskBottomBar() {
     (path === '/patient/allergies' && (!allergyHistory.hasAllergy || (allergyHistory.hasAllergy === 'yes' && (!allergyHistory.allergyType || !allergyHistory.reaction)))) ||
     (path === '/patient/documents/scan' && !documentIntake.completed && documentIntake.documents.length === 0);
 
-  // Hide Back on processing (it's automatic)
+  // Hide Back on processing (it's automatic) and completion
   const hideBack =
     path === '/patient' ||
     path === '/patient/' ||
-    path === '/patient/voice-processing';
+    path === '/patient/voice-processing' ||
+    path === '/patient/submit' ||
+    path === '/patient/complete';
 
   return (
     <footer className="bg-white border-t border-slate-200 px-8 py-6 flex items-center justify-between sticky bottom-0 z-50">
@@ -209,7 +211,7 @@ export function KioskBottomBar() {
         </button>
       </div>
 
-      {path !== '/patient/voice-processing' && (
+      {path !== '/patient/voice-processing' && path !== '/patient/submit' && path !== '/patient/complete' && (
         <button
           onClick={handleContinue}
           disabled={isContinueDisabled}
