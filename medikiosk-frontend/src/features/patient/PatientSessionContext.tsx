@@ -203,6 +203,7 @@ export interface FollowUpPlan {
 
 export interface ConsultationState {
   status: 'idle' | 'draft' | 'finalized';
+  ayushStatus?: 'pending' | 'in-progress' | 'draft' | 'completed';
   clinicalAssessment: ClinicalAssessment;
   ayushAssessment: AyushDoctorAssessment;
   prescription: Prescription;
@@ -210,10 +211,12 @@ export interface ConsultationState {
   startedAt?: string;
   updatedAt?: string;
   finalizedAt?: string;
+  ayushFinalizedAt?: string;
 }
 
 const defaultConsultationState: ConsultationState = {
   status: 'idle',
+  ayushStatus: 'pending',
   clinicalAssessment: { findings: '', assessment: '', diagnosis: '', notes: '' },
   ayushAssessment: { prakriti: '', agni: '', koshtha: '', dosha: '', notes: '' },
   prescription: { items: [] },

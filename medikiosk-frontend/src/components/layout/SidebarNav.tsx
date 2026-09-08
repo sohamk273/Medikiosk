@@ -4,11 +4,11 @@ import { Link, useLocation } from 'react-router-dom';
 const navItems = [
   { path: '/doctor/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/doctor/queue', label: 'Patient Queue', icon: Users },
-  { path: '/doctor/patients', label: 'Patient Cases', icon: FileText },
-  { path: '#', label: 'AYUSH Assessments', icon: Activity },
-  { path: '#', label: 'Documents & OCR', icon: FileScan },
-  { path: '#', label: 'Clinical Reports', icon: ClipboardList },
-  { path: '#', label: 'Hospital Settings', icon: Settings },
+  { path: '/doctor/cases', label: 'Patient Cases', icon: FileText },
+  { path: '/doctor/ayush', label: 'AYUSH Assessments', icon: Activity },
+  { path: '/doctor/documents', label: 'Documents & OCR', icon: FileScan },
+  { path: '/doctor/reports', label: 'Clinical Reports', icon: ClipboardList },
+  { path: '/doctor/settings', label: 'Hospital Settings', icon: Settings },
 ];
 
 export function SidebarNav() {

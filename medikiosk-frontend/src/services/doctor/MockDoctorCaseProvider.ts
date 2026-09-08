@@ -141,6 +141,24 @@ export class MockDoctorCaseProvider {
     return MOCK_DB[id]?.consultation;
   }
 
+  static getAttentionCases(): DoctorCase[] {
+    return this.getCases().filter(c => c.redFlagTriggered && c.status !== 'completed' && c.status !== 'closed');
+  }
+
+  static getActiveConsultations(): DoctorCase[] {
+    return this.getCases().filter(c => c.status === 'in-consultation');
+  }
+
+  static getRecentlyCompletedCases(limit: number): DoctorCase[] {
+    return this.getCases()
+      .filter(c => c.status === 'completed' || c.status === 'closed')
+      .slice(0, limit);
+  }
+
+  static getDraftConsultations(): DoctorCase[] {
+    return this.getCases().filter(c => c.consultation?.status === 'draft' && c.status !== 'completed' && c.status !== 'closed');
+  }
+
   static saveConsultation(id: string, consultation: ConsultationState): void {
     if (MOCK_DB[id]) {
       MOCK_DB[id].consultation = consultation;

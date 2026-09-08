@@ -31,16 +31,17 @@ import Login from '@/pages/doctor/Login';
 import Dashboard from '@/pages/doctor/Dashboard';
 import DoctorQueue from '@/pages/doctor/DoctorQueue';
 import CaseDetail from '@/pages/doctor/CaseDetail';
-import Patients from '@/pages/doctor/Patients';
+import PatientCases from '@/pages/doctor/PatientCases';
+import PatientRecord from '@/pages/doctor/PatientRecord';
 import Consultation from '@/pages/doctor/Consultation';
 import CaseSummary from '@/pages/doctor/CaseSummary';
-import Summary from '@/pages/doctor/patient/Summary';
-import History from '@/pages/doctor/patient/History';
-import PatientAyush from '@/pages/doctor/patient/Ayush';
-import Documents from '@/pages/doctor/patient/Documents';
-import Investigations from '@/pages/doctor/patient/Investigations';
-import Prescription from '@/pages/doctor/patient/Prescription';
-import Prakriti from '@/pages/doctor/patient/Prakriti';
+import AyushAssessments from '@/pages/doctor/AyushAssessments';
+import AyushAssessmentDetail from '@/pages/doctor/AyushAssessmentDetail';
+import DocumentsOcr from '@/pages/doctor/DocumentsOcr';
+import DocumentDetail from '@/pages/doctor/DocumentDetail';
+import ClinicalReports from '@/pages/doctor/ClinicalReports';
+import ClinicalReportDetail from '@/pages/doctor/ClinicalReportDetail';
+import Settings from '@/pages/doctor/Settings';
 
 export const router = createBrowserRouter([
   {
@@ -85,21 +86,16 @@ export const router = createBrowserRouter([
       { path: 'queue', element: <DoctorQueue /> },
       { path: 'case/:caseId', element: <CaseDetail /> },
       { path: 'case/:caseId/summary', element: <CaseSummary /> },
-      { path: 'patients', element: <Patients /> },
+      { path: 'cases', element: <PatientCases /> },
+      { path: 'patient/:patientId', element: <PatientRecord /> },
+      { path: 'ayush', element: <AyushAssessments /> },
+      { path: 'ayush/:caseId', element: <AyushAssessmentDetail /> },
       { path: 'consultation/:caseId', element: <Consultation /> },
-      {
-        path: 'patient/:id',
-        children: [
-          { index: true, element: <Navigate to="summary" replace /> },
-          { path: 'summary', element: <Summary /> },
-          { path: 'history', element: <History /> },
-          { path: 'ayush', element: <PatientAyush /> },
-          { path: 'documents', element: <Documents /> },
-          { path: 'investigations', element: <Investigations /> },
-          { path: 'prescription', element: <Prescription /> },
-          { path: 'prakriti', element: <Prakriti /> },
-        ]
-      }
+      { path: 'documents', element: <DocumentsOcr /> },
+      { path: 'documents/:documentId', element: <DocumentDetail /> },
+      { path: 'reports', element: <ClinicalReports /> },
+      { path: 'reports/:reportId', element: <ClinicalReportDetail /> },
+      { path: 'settings', element: <Settings /> },
     ],
   }
 ]);

@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, User, Phone, CheckCircle2, AlertCircle, 
-  FileText, Activity, Clock, PlayCircle, Pill, FileIcon 
+  FileText, Activity, Clock, PlayCircle, Pill, FileIcon, ClipboardList, Eye, FilePlus2
 } from 'lucide-react';
 import { MockDoctorCaseProvider } from '@/services/doctor/MockDoctorCaseProvider';
+import { MockAyushAssessmentProvider } from '@/services/doctor/MockAyushAssessmentProvider';
+import { MockDocumentProvider } from '@/services/doctor/MockDocumentProvider';
+import { MockClinicalReportProvider } from '@/services/doctor/MockClinicalReportProvider';
 import type { DoctorCase } from '@/services/doctor/MockDoctorCaseProvider';
-import type { PatientDocument } from '@/features/patient/PatientSessionContext';
-import { Modal } from '@/components/ui/Modal';
 
 export default function CaseDetail() {
   const { caseId } = useParams();
@@ -16,7 +17,6 @@ export default function CaseDetail() {
   const [caseData, setCaseData] = useState<DoctorCase | null>(() => {
     return caseId ? (MockDoctorCaseProvider.getCaseById(caseId) || null) : null;
   });
-  const [previewDoc, setPreviewDoc] = useState<PatientDocument | null>(null);
 
   useEffect(() => {
     if (caseId) {
@@ -324,35 +324,77 @@ export default function CaseDetail() {
 
           {/* Documents */}
           <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
-            <div className="bg-slate-50 px-6 py-4 border-b border-slate-200">
+            <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
               <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
                 <FileText className="w-4 h-4" /> Documents
               </h2>
             </div>
             <div className="p-6 space-y-4">
-              {caseData.documents && caseData.documents.length > 0 ? (
-                caseData.documents.map((doc, idx) => (
+              {(() => {
+                const docs = MockDocumentProvider.getDocumentsByCase(caseId!);
+                if (docs.length === 0) return <p className="text-slate-500 italic">No documents attached.</p>;
+                return docs.map((doc, idx) => (
                   <div key={idx} className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl">
                     <div className="flex items-center gap-3 overflow-hidden">
                       <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shrink-0 border border-slate-200">
                         <FileIcon className="w-5 h-5 text-slate-400" />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-bold text-slate-700 truncate">{doc.title}</p>
+                        <p className="font-bold text-slate-700 truncate">{doc.documentType}</p>
                         <p className="text-xs text-slate-500 truncate">{doc.fileName || doc.id}</p>
                       </div>
                     </div>
                     <button 
-                      onClick={() => setPreviewDoc(doc)}
-                      className="text-primary font-bold text-sm bg-primary/10 px-3 py-1.5 rounded-lg hover:bg-primary/20 transition-colors whitespace-nowrap ml-2"
+                      onClick={() => navigate(`/doctor/documents/${doc.id}`)}
+                      className="text-primary font-bold text-sm bg-primary/10 px-4 py-2 rounded-lg hover:bg-primary/20 transition-colors whitespace-nowrap ml-2 flex items-center gap-2"
                     >
-                      View
+                      <Eye className="w-4 h-4" /> View
                     </button>
                   </div>
-                ))
-              ) : (
-                <p className="text-slate-500 italic">No documents attached.</p>
-              )}
+                ));
+              })()}
+            </div>
+          </div>
+
+          {/* Clinical Reports */}
+          <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
+            <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+              <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                <ClipboardList className="w-4 h-4" /> Clinical Reports
+              </h2>
+              <button 
+                onClick={() => navigate('/doctor/reports')}
+                className="text-teal-600 hover:text-teal-700 text-sm font-bold flex items-center gap-1"
+              >
+                <FilePlus2 className="w-4 h-4" /> Generate Report
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              {(() => {
+                const reports = MockClinicalReportProvider.getReportsByCaseId(caseId!);
+                if (reports.length === 0) return <p className="text-slate-500 italic">No reports available.</p>;
+                return reports.map((report) => (
+                  <div key={report.id} className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                    <div className="flex items-center gap-3 overflow-hidden">
+                      <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shrink-0 border border-slate-200 text-teal-600">
+                        <ClipboardList className="w-5 h-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-bold text-slate-700 truncate">{report.title}</p>
+                        <p className="text-xs text-slate-500 truncate">
+                          {report.status.toUpperCase()} • {new Date(report.generatedAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => navigate(`/doctor/reports/${report.id}`)}
+                      className="text-primary font-bold text-sm bg-primary/10 px-4 py-2 rounded-lg hover:bg-primary/20 transition-colors whitespace-nowrap ml-2 flex items-center gap-2"
+                    >
+                      <Eye className="w-4 h-4" /> View
+                    </button>
+                  </div>
+                ));
+              })()}
             </div>
           </div>
 
@@ -409,38 +451,26 @@ export default function CaseDetail() {
             View Final Summary
           </button>
         )}
+
+        {(() => {
+          const ayushData = MockAyushAssessmentProvider.getAssessmentByCaseId(caseId!);
+          if (!ayushData) return null;
+          
+          return (
+            <button 
+              onClick={() => navigate(`/doctor/ayush/${caseId}`)}
+              className="bg-white border-2 border-[#0D9488] text-[#0D9488] px-8 py-3 rounded-2xl font-bold text-lg hover:bg-[#0D9488]/5 shadow-sm transition-colors flex items-center gap-2"
+            >
+              <Activity className="w-5 h-5" />
+              {ayushData.ayushStatus === 'pending' ? 'Start AYUSH' : 
+               (ayushData.ayushStatus === 'in-progress' || ayushData.ayushStatus === 'draft') ? 'Resume AYUSH' : 
+               'View AYUSH'}
+            </button>
+          );
+        })()}
       </div>
 
-      {/* Document Preview Modal */}
-      <Modal
-        open={previewDoc !== null}
-        onClose={() => setPreviewDoc(null)}
-        title={
-          <div className="flex items-center gap-3 text-slate-800">
-            <FileText className="w-6 h-6 text-[#0D9488]" />
-            <h3 className="font-bold text-xl">{previewDoc?.title}</h3>
-          </div>
-        }
-      >
-        {previewDoc && (
-          <div className="space-y-4">
-            <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center">
-              DEMO PREVIEW - SYNTHETIC DATA
-            </div>
-            <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 min-h-[300px] whitespace-pre-wrap font-mono text-sm text-slate-700">
-              {previewDoc.mockOcrText}
-            </div>
-            <div className="flex justify-end pt-2">
-              <button
-                onClick={() => setPreviewDoc(null)}
-                className="px-6 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold rounded-xl transition-colors"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        )}
-      </Modal>
+      {/* Document Preview Modal Removed */}
 
     </div>
   );

@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
-  ArrowLeft, CheckCircle2, AlertCircle, FileText, 
-  Activity, Clock, Pill, Printer, Download, Lock, User
+  ArrowLeft, Printer, CheckCircle2, AlertCircle, FileText, Activity, Pill, Lock, ClipboardList, Eye, Download, Clock, User
 } from 'lucide-react';
 import { MockDoctorCaseProvider } from '@/services/doctor/MockDoctorCaseProvider';
+import { MockDocumentProvider } from '@/services/doctor/MockDocumentProvider';
+import { MockClinicalReportProvider } from '@/services/doctor/MockClinicalReportProvider';
 import type { DoctorCase } from '@/services/doctor/MockDoctorCaseProvider';
-import { usePatientSession } from '@/features/patient/PatientSessionContext';
-import type { PatientDocument } from '@/features/patient/PatientSessionContext';
 import { Modal } from '@/components/ui/Modal';
+import { usePatientSession } from '@/features/patient/PatientSessionContext';
 
 export default function CaseSummary() {
   const { caseId } = useParams<{ caseId: string }>();
@@ -18,9 +18,8 @@ export default function CaseSummary() {
   const [caseData, setCaseData] = useState<DoctorCase | null>(null);
   const [loading, setLoading] = useState(true);
 
+
   // Modal states
-  const [showDocModal, setShowDocModal] = useState(false);
-  const [selectedDoc, setSelectedDoc] = useState<PatientDocument | null>(null);
   const [showCloseModal, setShowCloseModal] = useState(false);
   const [showToast, setShowToast] = useState(false);
 
@@ -419,30 +418,58 @@ export default function CaseSummary() {
               </div>
 
               {/* Documents */}
-              {caseData.documents && caseData.documents.length > 0 && (
-                <div className="bg-white p-4 rounded-xl border border-slate-100">
-                  <h3 className="font-bold text-slate-800 mb-3 border-b border-slate-100 pb-2">Documents</h3>
-                  <div className="space-y-3">
-                    {caseData.documents.map(doc => (
-                      <div key={doc.id} className="flex items-center justify-between bg-slate-50 p-3 rounded-lg border border-slate-100">
-                        <div>
-                          <p className="font-bold text-slate-800 text-sm">{doc.type}</p>
-                          <p className="text-xs text-slate-500">Status: {doc.status}</p>
+              {(() => {
+                const docs = MockDocumentProvider.getDocumentsByCase(caseId!);
+                if (docs.length === 0) return null;
+                return (
+                  <div className="bg-white p-4 rounded-xl border border-slate-100">
+                    <h3 className="font-bold text-slate-800 mb-3 border-b border-slate-100 pb-2 flex items-center gap-2"><FileText className="w-4 h-4 text-slate-500" /> Documents</h3>
+                    <div className="space-y-3">
+                      {docs.map(doc => (
+                        <div key={doc.id} className="flex items-center justify-between bg-slate-50 p-3 rounded-lg border border-slate-100">
+                          <div className="flex-1 min-w-0 pr-4">
+                            <p className="font-bold text-slate-800 text-sm truncate">{doc.documentType}</p>
+                            <p className="text-xs text-slate-500 truncate">{doc.fileName}</p>
+                          </div>
+                          <button
+                            onClick={() => navigate(`/doctor/documents/${doc.id}`)}
+                            className="px-4 py-1.5 bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-600 hover:bg-slate-100 transition-colors shrink-0 flex items-center gap-2"
+                          >
+                            <Eye className="w-3 h-3" /> View
+                          </button>
                         </div>
-                        <button
-                          onClick={() => {
-                            setSelectedDoc(doc);
-                            setShowDocModal(true);
-                          }}
-                          className="px-4 py-1.5 bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-600 hover:bg-slate-100 transition-colors"
-                        >
-                          View
-                        </button>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
+
+              {/* Clinical Reports */}
+              {(() => {
+                const reports = MockClinicalReportProvider.getReportsByCaseId(caseId!);
+                if (reports.length === 0) return null;
+                return (
+                  <div className="bg-white p-4 rounded-xl border border-slate-100 mt-4 print:hidden">
+                    <h3 className="font-bold text-slate-800 mb-3 border-b border-slate-100 pb-2 flex items-center gap-2"><ClipboardList className="w-4 h-4 text-slate-500" /> Clinical Reports</h3>
+                    <div className="space-y-3">
+                      {reports.map(report => (
+                        <div key={report.id} className="flex items-center justify-between bg-slate-50 p-3 rounded-lg border border-slate-100">
+                          <div className="flex-1 min-w-0 pr-4">
+                            <p className="font-bold text-slate-800 text-sm truncate">{report.title}</p>
+                            <p className="text-xs text-slate-500">{new Date(report.generatedAt).toLocaleDateString()}</p>
+                          </div>
+                          <button
+                            onClick={() => navigate(`/doctor/reports/${report.id}`)}
+                            className="px-4 py-1.5 bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-600 hover:bg-slate-100 transition-colors shrink-0 flex items-center gap-2"
+                          >
+                            <Eye className="w-3 h-3" /> View
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
 
             </div>
           </div>
@@ -468,39 +495,7 @@ export default function CaseSummary() {
         </div>
       )}
 
-      {/* Document Preview Modal */}
-      <Modal open={showDocModal} onClose={() => setShowDocModal(false)}>
-        <div className="space-y-6">
-          <div className="flex items-center justify-between border-b border-slate-200 pb-4">
-            <h2 className="text-2xl font-black text-slate-800">{selectedDoc?.type || 'Document'}</h2>
-          </div>
-          
-          <div className="bg-amber-50 text-amber-800 p-3 rounded-xl text-center font-bold text-sm border border-amber-200">
-            DEMO PREVIEW - SYNTHETIC DATA
-          </div>
-          
-          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 min-h-[300px]">
-            <div className="flex items-center justify-center h-40 bg-slate-200 rounded-xl mb-4 border-2 border-dashed border-slate-300">
-              <span className="text-slate-400 font-bold">[ Synthetic Document Image ]</span>
-            </div>
-            {selectedDoc?.mockOcrText && (
-              <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Extracted Text</p>
-                <div className="bg-white p-4 rounded-xl border border-slate-200 text-sm text-slate-700 font-mono whitespace-pre-wrap">
-                  {selectedDoc.mockOcrText}
-                </div>
-              </div>
-            )}
-          </div>
-          
-          <button 
-            onClick={() => setShowDocModal(false)}
-            className="w-full bg-slate-800 text-white py-4 rounded-2xl font-bold text-lg hover:bg-slate-700 transition-colors"
-          >
-            Close Preview
-          </button>
-        </div>
-      </Modal>
+      {/* Document Preview Modal Removed in favor of Centralized Route */}
 
       {/* Close Case Confirmation Modal */}
       <Modal open={showCloseModal} onClose={() => setShowCloseModal(false)}>
